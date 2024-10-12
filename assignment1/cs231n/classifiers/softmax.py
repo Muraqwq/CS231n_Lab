@@ -33,9 +33,21 @@ def softmax_loss_naive(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    num_train = X.shape[0]
+    scores = X.dot(W)
+    scores -= np.max(scores ,axis=1, keepdims=True)
+    probability = np.exp(scores) / np.sum(np.exp(scores), axis=1, keepdims=True)
+  
+    
+    tar_label_probability = probability[np.arange(0, num_train), y]
+    cross_entropy_loss = -np.log(tar_label_probability)
+    loss += np.sum(cross_entropy_loss) / num_train
+    loss += reg * np.sum(W ** 2)
+    
+    p_for_grad = probability
+    p_for_grad[np.arange(0, num_train), y] -= 1
+    dW = X.T.dot(p_for_grad) / num_train
+    dW += 2 * reg * W
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     return loss, dW
@@ -58,9 +70,21 @@ def softmax_loss_vectorized(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    num_train = X.shape[0]
+    scores = X.dot(W)
+    scores -= np.max(scores ,axis=1, keepdims=True)
+    probability = np.exp(scores) / np.sum(np.exp(scores), axis=1, keepdims=True)
+  
+    
+    tar_label_probability = probability[np.arange(0, num_train), y]
+    cross_entropy_loss = -np.log(tar_label_probability)
+    loss += np.sum(cross_entropy_loss) / num_train
+    loss += reg * np.sum(W ** 2)
+    
+    p_for_grad = probability
+    p_for_grad[np.arange(0, num_train), y] -= 1
+    dW = X.T.dot(p_for_grad) / num_train
+    dW += 2 * reg * W
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     return loss, dW

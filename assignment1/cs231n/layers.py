@@ -27,9 +27,9 @@ def affine_forward(x, w, b):
     # will need to reshape the input into rows.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    input = x.reshape(x.shape[0], -1)
+    out = input.dot(w) + b
+    cache = (x, w, b)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -60,9 +60,9 @@ def affine_backward(dout, cache):
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    dx = dout.dot(w.T).reshape(x.shape)
+    dw = x.reshape(x.shape[0], -1).T.dot(dout)
+    db = np.sum(dout, axis=0).T
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -86,9 +86,7 @@ def relu_forward(x):
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    out = np.maximum(0, x)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -113,9 +111,9 @@ def relu_backward(dout, cache):
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    map = np.zeros(x.shape)
+    map[x > 0] = 1
+    dx = dout * map
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -772,9 +770,19 @@ def svm_loss(x, y):
     # TODO: Copy over your solution from A1.
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    num_train = x.shape[0]
+    target_cls_scores = x[np.arange(num_train), y].reshape(-1 ,1)
+    margins = x - target_cls_scores + 1
+    margins[np.arange(num_train), y] = 0
+    margins = np.maximum(0, margins)
+    
+    loss = np.sum(margins) / num_train
+    item_need_loss = np.zeros(x.shape)
+    item_need_loss[margins != 0] = 1
+    valid_margin_count = item_need_loss.sum(axis=1)
+    item_need_loss[np.arange(num_train), y] -= valid_margin_count
+    
+    dx = item_need_loss / num_train
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -802,9 +810,17 @@ def softmax_loss(x, y):
     # TODO: Copy over your solution from A1.
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    num_train = x.shape[0]
+    scores = x - np.max(x ,axis=1, keepdims=True)
+    probability = np.exp(scores) / np.sum(np.exp(scores), axis=1, keepdims=True)
+    
+    tar_label_probability = probability[np.arange(0, num_train), y]
+    cross_entropy_loss= -np.log(tar_label_probability)
+    loss = np.sum(cross_entropy_loss) / num_train
+    
+    p_for_grad = probability
+    p_for_grad[np.arange(0, num_train), y] -= 1
+    dx = p_for_grad / num_train
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #

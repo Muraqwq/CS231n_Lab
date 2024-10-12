@@ -54,9 +54,10 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W2' and 'b2'.                         #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
-
+        self.params['W1'] = weight_scale * np.random.normal(size=(input_dim, hidden_dim)) 
+        self.params['b1'] = np.zeros((hidden_dim, ))
+        self.params['W2'] = weight_scale * np.random.normal(size=(hidden_dim, num_classes)) 
+        self.params['b2'] = np.zeros((num_classes, ))
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -87,9 +88,8 @@ class TwoLayerNet(object):
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
-
+        y1, relu_caches= affine_relu_forward(X, self.params['W1'], self.params['b1'])
+        scores, fc_caches = affine_forward(y1, self.params['W2'], self.params['b2'])
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -111,9 +111,15 @@ class TwoLayerNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
-
+        factor = 0.5
+        loss, dout = softmax_loss(scores, y)
+        loss += factor * self.reg * (np.sum(self.params['W2'] ** 2) + np.sum(self.params['W1'] ** 2))
+        y1_grad, grads['W2'], grads['b2'] = affine_backward(dout, fc_caches)
+        grads['W2'] += factor * self.reg * 2 * self.params['W2']
+        _, grads['W1'], grads['b1'] = affine_relu_backward(y1_grad, relu_caches)
+        grads['W1'] += factor * self.reg * 2 * self.params['W1']
+        
+        
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
