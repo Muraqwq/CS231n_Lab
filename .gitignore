@@ -1,0 +1,4 @@
+__pycache__/
+cs231n/datasets/
+data/
+build/
